@@ -1,0 +1,24 @@
+import { Directive, ElementRef, Renderer2 } from '@angular/core';
+
+@Directive({
+    selector: '[appNonPropagatingScroll]',
+    exportAs: 'appNonPropagatingScroll'
+})
+
+export class NonPropagatingScrollDirective {
+    constructor(private elRef: ElementRef, private renderer: Renderer2) {
+        renderer.listen(elRef.nativeElement, 'wheel', e => {
+            if (this.isPreventionRequired(elRef.nativeElement, e)) {
+                if (e.preventDefault) {
+                    e.preventDefault();
+                }
+                e.returnValue = false;
+            }
+        });
+    }
+
+    private isPreventionRequired(el: HTMLElement, e: WheelEvent): boolean {
+        return (el.scrollTop === 0 && e.deltaY < 0) || // scroll up while already on top
+            (el.scrollTop + el.offsetHeight >= el.scrollHeight && e.deltaY > 0); // scroll down while already on bottom
+    }
+}
